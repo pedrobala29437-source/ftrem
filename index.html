@@ -1,18 +1,244 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Site</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    h1 { font-size: 3rem; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem; }
-    p { font-size: 1.2rem; color: #aaa; text-align: center; max-width: 600px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airbnb - Aluguéis por temporada e experiências únicas</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #222; }
+
+  /* HEADER */
+  header { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #e0e0e0; z-index: 100; padding: 0 24px; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; height: 80px; gap: 16px; }
+  .logo { display: flex; align-items: center; gap: 4px; text-decoration: none; }
+  .logo svg { width: 32px; height: 32px; fill: #FF385C; }
+  .logo span { color: #FF385C; font-weight: 700; font-size: 22px; }
+
+  .search-bar { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 40px; padding: 0; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.08); transition: box-shadow 0.2s; }
+  .search-bar:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .search-item { padding: 12px 16px; font-size: 14px; border-right: 1px solid #ddd; }
+  .search-item:last-of-type { border-right: none; }
+  .search-item label { display: block; font-weight: 600; font-size: 12px; }
+  .search-item span { color: #717171; font-size: 13px; }
+  .search-btn { background: #FF385C; border: none; border-radius: 50%; width: 34px; height: 34px; margin: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .search-btn svg { width: 16px; height: 16px; fill: white; }
+
+  .header-right { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .host-link { padding: 12px 16px; border-radius: 24px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; color: #222; }
+  .host-link:hover { background: #f7f7f7; }
+  .user-menu { display: flex; align-items: center; gap: 8px; border: 1px solid #ddd; border-radius: 24px; padding: 8px 12px; cursor: pointer; }
+  .user-menu:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+  .hamburger { display: flex; flex-direction: column; gap: 3px; }
+  .hamburger span { display: block; width: 16px; height: 2px; background: #222; }
+  .avatar { width: 30px; height: 30px; background: #717171; border-radius: 50%; }
+
+  /* CATEGORIES */
+  .categories { display: flex; gap: 24px; padding: 16px 24px; overflow-x: auto; border-bottom: 1px solid #e0e0e0; scrollbar-width: none; }
+  .categories::-webkit-scrollbar { display: none; }
+  .category { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; opacity: 0.6; min-width: 56px; padding-bottom: 12px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .category.active { opacity: 1; border-bottom-color: #222; }
+  .category:hover { opacity: 1; }
+  .category svg, .category img { width: 24px; height: 24px; }
+  .category span { font-size: 12px; font-weight: 500; white-space: nowrap; }
+
+  /* GRID */
+  .listings { padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+  .card { cursor: pointer; }
+  .card-img { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 1; }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+  .card:hover .card-img img { transform: scale(1.02); }
+  .heart { position: absolute; top: 12px; right: 12px; background: none; border: none; cursor: pointer; }
+  .heart svg { width: 24px; height: 24px; fill: rgba(0,0,0,0.5); stroke: white; stroke-width: 2; }
+  .heart:hover svg { fill: #FF385C; }
+  .badge { position: absolute; top: 12px; left: 12px; background: white; border-radius: 6px; padding: 4px 8px; font-size: 12px; font-weight: 600; }
+  .card-info { padding: 12px 0 0; }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .card-location { font-weight: 600; font-size: 15px; }
+  .card-rating { display: flex; align-items: center; gap: 4px; font-size: 14px; }
+  .card-rating svg { width: 12px; height: 12px; fill: #222; }
+  .card-distance { color: #717171; font-size: 14px; margin-top: 2px; }
+  .card-dates { color: #717171; font-size: 14px; }
+  .card-price { margin-top: 4px; font-size: 15px; }
+  .card-price strong { font-weight: 600; }
+  .card-price span { color: #717171; font-weight: 400; }
+
+  /* FOOTER */
+  footer { background: #f7f7f7; border-top: 1px solid #e0e0e0; padding: 48px 24px 24px; margin-top: 40px; }
+  .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; margin-bottom: 32px; }
+  .footer-col h4 { font-size: 13px; font-weight: 700; margin-bottom: 16px; }
+  .footer-col a { display: block; color: #717171; font-size: 14px; margin-bottom: 12px; text-decoration: none; }
+  .footer-col a:hover { text-decoration: underline; }
+  .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid #e0e0e0; font-size: 14px; color: #717171; flex-wrap: wrap; gap: 16px; }
+</style>
 </head>
 <body>
-  <h1>Bem-vindo</h1>
-  <p>Este site é controlado por comando de voz via JARVIS.</p>
+
+<header>
+  <div class="header-top">
+    <a href="#" class="logo">
+      <svg viewBox="0 0 32 32"><path d="M16 1C9.5 1 1 10.8 1 19.5c0 5.2 3.2 9.5 8.2 11 .6.1 1.2.2 1.8.2 2.1 0 4.1-.8 5-2.2.9 1.4 2.9 2.2 5 2.2.6 0 1.2-.1 1.8-.2 5-1.5 8.2-5.8 8.2-11C31 10.8 22.5 1 16 1zm-1.5 25.8c-.6.5-1.4.7-2.3.5-3.6-1.1-5.9-4.4-5.9-8.8 0-7.2 6.9-15.5 9.7-15.5.3 0 .5.1.5.3-.1 1.2-2 14.3-2 23.5zm3 .5c-.9.2-1.7 0-2.3-.5 0-9.2-1.9-22.3-2-23.5 0-.2.2-.3.5-.3 2.8 0 9.7 8.3 9.7 15.5 0 4.4-2.3 7.7-5.9 8.8z"/></svg>
+      <span>airbnb</span>
+    </a>
+
+    <div class="search-bar">
+      <div class="search-item">
+        <label>Onde</label>
+        <span>Buscar destinos</span>
+      </div>
+      <div class="search-item">
+        <label>Check-in</label>
+        <span>Adicionar datas</span>
+      </div>
+      <div class="search-item">
+        <label>Check-out</label>
+        <span>Adicionar datas</span>
+      </div>
+      <div class="search-item">
+        <label>Hóspedes</label>
+        <span>Adicionar hóspedes</span>
+      </div>
+      <button class="search-btn">
+        <svg viewBox="0 0 32 32"><path d="M13 24c6.1 0 11-4.9 11-11S19.1 2 13 2 2 6.9 2 13s4.9 11 11 11zm16 4.6l-7-7"/></svg>
+      </button>
+    </div>
+
+    <div class="header-right">
+      <a href="#" class="host-link">Anuncie no Airbnb</a>
+      <div class="user-menu">
+        <div class="hamburger">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="avatar"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="categories">
+  <div class="category active">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="10" width="28" height="20" rx="2"/><path d="M6 10V7a10 10 0 0120 0v3"/><circle cx="16" cy="20" r="3"/></svg>
+    <span>Piscinas</span>
+  </div>
+  <div class="category">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 2L2 20h28L16 2z"/><path d="M12 20v10h8V20"/></svg>
+    <span>Cabanas</span>
+  </div>
+  <div class="category">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><circle cx="16" cy="16" r="12"/><path d="M16 4v24M4 16h24"/></svg>
+    <span>Ilhas</span>
+  </div>
+  <div class="category">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 28L16 6l12 22H4z"/><path d="M10 28v-8h12v8"/></svg>
+    <span>Camping</span>
+  </div>
+  <div class="category">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="8" width="24" height="20" rx="2"/><path d="M10 8V6a6 6 0 0112 0v2"/></svg>
+    <span>Luxo</span>
+  </div>
+  <div class="category">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 26L16 4l12 22"/><path d="M4 26h24"/></svg>
+    <span>Fazendas</span>
+  </div>
+  <div class="category">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><circle cx="16" cy="12" r="8"/><path d="M8 28c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+    <span>Experiências</span>
+  </div>
+  <div class="category">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 26c4-8 10-14 14-14s10 6 14 14"/><path d="M8 20c2-4 5-7 8-7s6 3 8 7"/></svg>
+    <span>Praia</span>
+  </div>
+  <div class="category">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="20" height="24" rx="2"/><path d="M10 10h12M10 16h12M10 22h8"/></svg>
+    <span>Novidades</span>
+  </div>
+  <div class="category">
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 2l3.1 9.5H29l-8 5.8 3.1 9.5L16 21l-8.1 5.8 3.1-9.5-8-5.8h9.9z"/></svg>
+    <span>Top anfitriões</span>
+  </div>
+</div>
+
+<div class="listings" id="listings"></div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h4>Suporte</h4>
+      <a href="#">Central de Ajuda</a>
+      <a href="#">AirCover</a>
+      <a href="#">Informações de segurança</a>
+      <a href="#">Opções de acessibilidade</a>
+      <a href="#">Cancele sua reserva</a>
+    </div>
+    <div class="footer-col">
+      <h4>Comunidade</h4>
+      <a href="#">Airbnb.org: acomodação de emergência</a>
+      <a href="#">Combate à discriminação</a>
+    </div>
+    <div class="footer-col">
+      <h4>Anfitrionato</h4>
+      <a href="#">Anuncie sua acomodação</a>
+      <a href="#">AirCover para anfitriões</a>
+      <a href="#">Recursos para anfitriões</a>
+      <a href="#">Fórum da comunidade</a>
+      <a href="#">Anunciar uma experiência</a>
+    </div>
+    <div class="footer-col">
+      <h4>Airbnb</h4>
+      <a href="#">Sala de imprensa</a>
+      <a href="#">Recursos para novos recursos</a>
+      <a href="#">Carta de nosso fundador</a>
+      <a href="#">Carreiras</a>
+      <a href="#">Investidores</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Airbnb, Inc. · Privacidade · Termos · Mapa do site</span>
+    <span>🌐 Português (BR) · R$ BRL</span>
+  </div>
+</footer>
+
+<script>
+const listings = [
+  { city: "Florianópolis, SC", dist: "A 320 km", dates: "10–15 de mar", price: "R$620", rating: "4.97", badge: "Escolha dos hóspedes", img: 10 },
+  { city: "Búzios, RJ", dist: "A 180 km", dates: "8–13 de mar", price: "R$480", rating: "4.92", img: 20 },
+  { city: "Trancoso, BA", dist: "A 1.240 km", dates: "15–20 de mar", price: "R$890", rating: "4.98", badge: "Mais desejado", img: 30 },
+  { city: "Fernando de Noronha, PE", dist: "A 2.100 km", dates: "5–10 de abr", price: "R$1.200", rating: "5.0", img: 40 },
+  { city: "Gramado, RS", dist: "A 890 km", dates: "20–25 de mar", price: "R$350", rating: "4.89", img: 50 },
+  { city: "Bonito, MS", dist: "A 1.050 km", dates: "12–17 de mar", price: "R$420", rating: "4.95", badge: "Escolha dos hóspedes", img: 60 },
+  { city: "Jericoacoara, CE", dist: "A 2.800 km", dates: "1–6 de abr", price: "R$540", rating: "4.91", img: 70 },
+  { city: "Paraty, RJ", dist: "A 260 km", dates: "18–23 de mar", price: "R$380", rating: "4.93", img: 80 },
+  { city: "Campos do Jordão, SP", dist: "A 180 km", dates: "22–27 de mar", price: "R$290", rating: "4.87", img: 90 },
+  { city: "Alter do Chão, PA", dist: "A 2.500 km", dates: "10–15 de abr", price: "R$310", rating: "4.96", badge: "Mais desejado", img: 100 },
+  { city: "Arraial do Cabo, RJ", dist: "A 210 km", dates: "14–19 de mar", price: "R$460", rating: "4.94", img: 110 },
+  { city: "São Miguel dos Milagres, AL", dist: "A 1.900 km", dates: "7–12 de abr", price: "R$670", rating: "4.99", img: 120 },
+];
+
+const grid = document.getElementById("listings");
+listings.forEach(l => {
+  grid.innerHTML += `
+  <div class="card">
+    <div class="card-img">
+      <img src="https://picsum.photos/400/400?random=${l.img}" alt="${l.city}" loading="lazy">
+      <button class="heart">
+        <svg viewBox="0 0 32 32"><path d="M16 28S4 20 4 11a7 7 0 0114-1h0a7 7 0 0114 1c0 9-12 17-12 17z"/></svg>
+      </button>
+      ${l.badge ? `<div class="badge">${l.badge}</div>` : ''}
+    </div>
+    <div class="card-info">
+      <div class="card-header">
+        <span class="card-location">${l.city}</span>
+        <span class="card-rating">
+          <svg viewBox="0 0 32 32"><path d="M16 2l3.1 9.5H29l-8 5.8 3.1 9.5L16 21l-8.1 5.8 3.1-9.5-8-5.8h9.9z"/></svg>
+          ${l.rating}
+        </span>
+      </div>
+      <div class="card-distance">${l.dist}</div>
+      <div class="card-dates">${l.dates}</div>
+      <div class="card-price"><strong>${l.price}</strong> <span>noite</span></div>
+    </div>
+  </div>`;
+});
+</script>
 </body>
 </html>
